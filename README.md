@@ -1,14 +1,14 @@
 Employee Management API
 
-Overview: This project is a RESTful Web API built with ASP.NET Core, designed for managing employee data within an organizational system. It provides comprehensive CRUD (Create, Read, Update, Delete) operations for employee records, leveraging Entity Framework Core for database interactions.
+Overview: This project is a RESTful Web API built with ASP.NET Core, designed for managing employee data within an organizational system. It provides comprehensive CRUD (Create, Read, Update, Delete) operations by using REST API for employee records, leveraging Entity Framework Core for database interactions.
 
 Features-
 
  1. Employee Management: Add, retrieve, update, and soft-delete employee records.
- 2. Relationship Handling: Establishes master-child relationships (e.g., Employee and EmployeeDetails) to manage detailed employee information.
+ 2. Relationship Handling: Establishes master-child relationships to manage detailed employee information.
  3. Secure and Scalable: Designed as a scalable backend API suitable for integration with frontend applications or other services.
  4. Use of Lambda Expressions: Implements efficient querying with LINQ lambda expressions for filtering and data manipulation.
- 5. Database Support: Connects seamlessly to a relational database management system (e.g., SQL Server) via Entity Framework Core.
+ 5. Database Support: Connects seamlessly to a relational database management system via Entity Framework Core.
 
 
 Technologies Used-
