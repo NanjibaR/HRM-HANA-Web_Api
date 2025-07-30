@@ -108,8 +108,6 @@ namespace HrmApp.Api.Controllers
 
                     }).ToList(),
 
-
-
                     EmployeeProfessionalCertifications = e.EmployeeProfessionalCertifications.Select(info => new EmployeeProfessionalCertificationDto
                     {
                         IdClient = info.IdClient,
@@ -121,10 +119,6 @@ namespace HrmApp.Api.Controllers
                         SetDate = DateTime.Now
 
                     }).ToList(),
-
-
-
-
 
                 })
 
