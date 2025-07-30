@@ -29,9 +29,11 @@ namespace HrmApp.Api.Controllers
         public async Task<ActionResult<IEnumerable<HrmDTO.EmployeeDTO>>> GetEmployees()
         {
             var employees = await _context.Employees
+
                 .Where(e => e.IdClient == 10001001)
-                .Select(e => new HrmDTO.EmployeeDTO
+                .Select(e => new EmployeeDTO
                 {
+                    IdClient = 10001001,
                     Id = e.Id,
                     EmployeeName = e.EmployeeName,
                     EmployeeNameBangla = e.EmployeeNameBangla,
@@ -56,9 +58,76 @@ namespace HrmApp.Api.Controllers
                     CreatedBy = e.CreatedBy,
                     SetDate = e.SetDate,
                     IsActive = e.IsActive,
+                    HasOvertime = e.HasOvertime ?? false,
+                    HasAttendenceBonus = e.HasAttendenceBonus ?? false,
+
+
+                    EmployeeDocuments = e.EmployeeDocuments.Select(doc => new DocummentDto
+                    {
+                        IdClient = doc.IdClient,
+                        DocumentName = doc.DocumentName,
+                        FileName = doc.FileName,
+                        UploadDate = doc.UploadDate,
+                        //UploadedFileExtention = extension,
+                        //UploadedFile = uploadedBytes,
+                        SetDate = DateTime.Now
+
+                    }).ToList(),
+
+
+                    EmployeeEducationInfos = e.EmployeeEducationInfos.Select(info => new EducationInfoDto
+                    {
+                        IdClient = info.IdClient,
+                        InstituteName = info.InstituteName,
+                        IdEducationLevel = info.IdEducationLevel,
+                        IdEducationExamination = info.IdEducationExamination,
+                        IdEducationResult = info.IdEducationResult,
+                        ExamScale = info.ExamScale,
+                        Marks = info.Marks,
+                        Major = info.Major,
+                        PassingYear = info.PassingYear,
+                        IsForeignInstitute = info.IsForeignInstitute,
+                        Duration = info.Duration,
+                        Achievement = info.Achievement,
+                        SetDate = DateTime.Now
+
+                    }).ToList(),
+
+
+                    EmployeeFamilyInfos = e.EmployeeFamilyInfos.Select(info => new EmployeefamilyInfoDto
+                    {
+                        IdClient = info.IdClient,
+                        IdGender = info.IdGender,
+                        IdRelationship = info.IdRelationship,
+                        Name = info.Name,
+                        ContactNo = info.ContactNo,
+                        DateOfBirth = info.DateOfBirth,
+                        CurrentAddress = info.CurrentAddress,
+                        PermanentAddress = info.PermanentAddress,
+                        SetDate = DateTime.Now
+
+                    }).ToList(),
+
+
+
+                    EmployeeProfessionalCertifications = e.EmployeeProfessionalCertifications.Select(info => new EmployeeProfessionalCertificationDto
+                    {
+                        IdClient = info.IdClient,
+                        CertificationTitle = info.CertificationTitle,
+                        CertificationInstitute = info.CertificationInstitute,
+                        InstituteLocation = info.InstituteLocation,
+                        FromDate = info.FromDate,
+                        ToDate = info.ToDate,
+                        SetDate = DateTime.Now
+
+                    }).ToList(),
+
+
+
+
 
                 })
-                
+
                  .ToListAsync();
             return Ok(employees);
         }
@@ -71,11 +140,12 @@ namespace HrmApp.Api.Controllers
         public async Task<ActionResult<HrmDTO.EmployeeDTO>> GetEmployeeById(int id)
         {
             var employee = await _context.Employees
-                .Where(e => e.Id == id && e.IdClient == 10001001)
-                .Select(e => new HrmDTO.EmployeeDTO
+
+                .Where(e => e.Id == id)
+                .Select(e => new EmployeeDTO
                 {
+                    IdClient = 10001001,
                     Id = e.Id,
-                    IdClient = e.IdClient,
                     EmployeeName = e.EmployeeName,
                     EmployeeNameBangla = e.EmployeeNameBangla,
                     FatherName = e.FatherName,
@@ -99,6 +169,72 @@ namespace HrmApp.Api.Controllers
                     CreatedBy = e.CreatedBy,
                     SetDate = e.SetDate,
                     IsActive = e.IsActive,
+
+                    EmployeeDocuments = e.EmployeeDocuments.Select(doc => new DocummentDto
+                    {
+                        IdClient = doc.IdClient,
+                        DocumentName = doc.DocumentName,
+                        FileName = doc.FileName,
+                        UploadDate = doc.UploadDate,
+                        //UploadedFileExtention = extension,
+                        //UploadedFile = uploadedBytes,
+                        SetDate = DateTime.Now
+
+                    }).ToList(),
+
+
+
+
+                    EmployeeEducationInfos = e.EmployeeEducationInfos.Select(info => new EducationInfoDto
+                    {
+                        IdClient = info.IdClient,
+                        InstituteName = info.InstituteName,
+                        IdEducationLevel = info.IdEducationLevel,
+                        IdEducationExamination = info.IdEducationExamination,
+                        IdEducationResult = info.IdEducationResult,
+                        ExamScale = info.ExamScale,
+                        Marks = info.Marks,
+                        Major = info.Major,
+                        PassingYear = info.PassingYear,
+                        IsForeignInstitute = info.IsForeignInstitute,
+                        Duration = info.Duration,
+                        Achievement = info.Achievement,
+                        SetDate = DateTime.Now
+
+                    }).ToList(),
+
+
+
+                    EmployeeFamilyInfos = e.EmployeeFamilyInfos.Select(info => new EmployeefamilyInfoDto
+                    {
+                        IdClient = info.IdClient,
+                        IdGender = info.IdGender,
+                        IdRelationship = info.IdRelationship,
+                        Name = info.Name,
+                        ContactNo = info.ContactNo,
+                        DateOfBirth = info.DateOfBirth,
+                        CurrentAddress = info.CurrentAddress,
+                        PermanentAddress = info.PermanentAddress,
+                        SetDate = DateTime.Now
+
+                    }).ToList(),
+
+
+
+                    EmployeeProfessionalCertifications = e.EmployeeProfessionalCertifications.Select(info => new EmployeeProfessionalCertificationDto
+                    {
+                        IdClient = info.IdClient,
+                        CertificationTitle = info.CertificationTitle,
+                        CertificationInstitute = info.CertificationInstitute,
+                        InstituteLocation = info.InstituteLocation,
+                        FromDate = info.FromDate,
+                        ToDate = info.ToDate,
+                        SetDate = DateTime.Now
+
+                    }).ToList(),
+
+
+
                 })
                 .FirstOrDefaultAsync();
 
@@ -120,8 +256,9 @@ namespace HrmApp.Api.Controllers
             var employee = new Employee
             {
 
-                Id = createDto.Id,
+
                 IdClient = 10001001,
+
                 EmployeeName = createDto.EmployeeName,
                 EmployeeNameBangla = createDto.EmployeeNameBangla,
                 FatherName = createDto.FatherName,
@@ -145,6 +282,79 @@ namespace HrmApp.Api.Controllers
                 SetDate = DateTime.Now,
                 IsActive = createDto.IsActive ?? true,
 
+
+
+
+                EmployeeDocuments = createDto.EmployeeDocuments.Select(doc => new EmployeeDocument
+                {
+                    IdClient = doc.IdClient,
+                    DocumentName = doc.DocumentName,
+                    FileName = doc.FileName,
+                    UploadDate = doc.UploadDate,
+                    //UploadedFileExtention = extension,
+                    //UploadedFile = uploadedBytes,
+                    SetDate = DateTime.Now
+
+                }).ToList(),
+
+
+
+
+
+                EmployeeEducationInfos = createDto.EmployeeEducationInfos.Select(info => new EmployeeEducationInfo
+                {
+                    IdClient = info.IdClient,
+                    InstituteName = info.InstituteName,
+                    IdEducationLevel = info.IdEducationLevel,
+                    IdEducationExamination = info.IdEducationExamination,
+                    IdEducationResult = info.IdEducationResult,
+                    ExamScale = info.ExamScale,
+                    Marks = info.Marks,
+                    Major = info.Major,
+                    PassingYear = info.PassingYear,
+                    IsForeignInstitute = info.IsForeignInstitute,
+                    Duration = info.Duration,
+                    Achievement = info.Achievement,
+                    SetDate = DateTime.Now
+
+                }).ToList(),
+
+
+
+
+                EmployeeFamilyInfos = createDto.EmployeeFamilyInfos.Select(info => new EmployeeFamilyInfo
+                {
+                    IdClient = info.IdClient,
+                    IdGender = info.IdGender,
+                    IdRelationship = info.IdRelationship,
+                    Name = info.Name,
+                    ContactNo = info.ContactNo,
+                    DateOfBirth = info.DateOfBirth,
+                    CurrentAddress = info.CurrentAddress,
+                    PermanentAddress = info.PermanentAddress,
+                    SetDate = DateTime.Now
+
+
+                }).ToList(),
+
+
+
+
+
+                EmployeeProfessionalCertifications = createDto.EmployeeProfessionalCertifications.Select(info => new EmployeeProfessionalCertification
+                {
+                    IdClient = info.IdClient,
+                    CertificationTitle = info.CertificationTitle,
+                    CertificationInstitute = info.CertificationInstitute,
+                    InstituteLocation = info.InstituteLocation,
+                    FromDate = info.FromDate,
+                    ToDate = info.ToDate,
+                    SetDate = DateTime.Now
+
+
+                }).ToList(),
+
+
             };
 
 
@@ -166,8 +376,8 @@ namespace HrmApp.Api.Controllers
             {
                 return BadRequest("Employee not found! ");
             }
-            employee.Id = updateDto.Id;
-            employee.IdClient = updateDto.IdClient;
+
+            employee.IdClient = 10001001;
             employee.IdGender = updateDto.IdGender;
             employee.EmployeeName = updateDto.EmployeeName;
             employee.Address = updateDto.Address;
@@ -205,7 +415,7 @@ namespace HrmApp.Api.Controllers
             if (employee == null)
                 return NotFound();
 
-            employee.IsActive= false;
+            employee.IsActive = false;
 
             await _context.SaveChangesAsync();
 
@@ -215,8 +425,10 @@ namespace HrmApp.Api.Controllers
 
     }
 
+
+
+
 }
-       
 
            
        

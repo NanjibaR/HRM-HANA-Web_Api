@@ -125,3 +125,10 @@ public partial class Employee
     [InverseProperty("Employees")]
     public virtual WeekOff? WeekOff { get; set; }
 }
+
+
+
+
+
+
+

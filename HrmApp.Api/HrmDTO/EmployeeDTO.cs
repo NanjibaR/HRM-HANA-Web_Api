@@ -25,6 +25,7 @@ namespace HrmApp.Api.HrmDTO
         [StringLength(250)]
         public string? MotherName { get; set; }
 
+        
         public int? IdReportingManager { get; set; }
 
         public int? IdJobType { get; set; }
@@ -34,6 +35,7 @@ namespace HrmApp.Api.HrmDTO
         public DateTime? BirthDate { get; set; }
 
         public DateTime? JoiningDate { get; set; }
+
 
         public int? IdGender { get; set; }
 
@@ -72,6 +74,15 @@ namespace HrmApp.Api.HrmDTO
         [StringLength(50)]
         public string? CreatedBy { get; set; }
 
-       
+
+
+        public List<DocummentDto> EmployeeDocuments { get; set; } = [];
+
+        public List<EducationInfoDto> EmployeeEducationInfos { get; set; } = [];
+        public List<EmployeefamilyInfoDto> EmployeeFamilyInfos { get; set; } = [];
+        public List<EmployeeProfessionalCertificationDto> EmployeeProfessionalCertifications { get; set; } = [];
+
+
+
     }
 }
