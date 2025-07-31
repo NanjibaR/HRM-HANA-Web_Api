@@ -14,6 +14,9 @@ namespace HrmApp.Api.HrmDTO
         public string? UploadedFileExtention { get; set; }
 
         public byte[]? UploadedFile { get; set; }
+
+        public byte[]? UploadedFileBase { get; set; }
         public DateTime? SetDate { get; set; }
+        public int Id { get; internal set; }
     }
 }

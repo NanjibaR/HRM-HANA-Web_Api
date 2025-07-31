@@ -82,7 +82,7 @@ namespace HrmApp.Api.HrmDTO
         public List<EmployeefamilyInfoDto> EmployeeFamilyInfos { get; set; } = [];
         public List<EmployeeProfessionalCertificationDto> EmployeeProfessionalCertifications { get; set; } = [];
 
-
+        public IFormFile? ProfileFile { get; set; }
 
     }
 }

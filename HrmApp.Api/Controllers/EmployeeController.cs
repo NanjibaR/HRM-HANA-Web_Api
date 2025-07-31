@@ -21,14 +21,29 @@ namespace HrmApp.Api.Controllers
         {
             _context = context;
         }
+        private async Task<byte[]?> ConvertFileToByteArrayAsync(IFormFile? file, CancellationToken cancellationToken)
+        {
+            if (file == null || file.Length == 0)
+                return null;
 
+            const long maxFileSize = 10 * 1024 * 1024;
+
+            if (file.Length > maxFileSize)
+                throw new Exception("File size cannot exceed 10 MB.");
+
+            using var memoryStream = new MemoryStream();
+            await file.CopyToAsync(memoryStream, cancellationToken);
+            return memoryStream.ToArray();
+        }
 
         //GET Operation
 
         [HttpGet()]
-        public async Task<ActionResult<IEnumerable<HrmDTO.EmployeeDTO>>> GetEmployees()
+        public async Task<ActionResult<IEnumerable<HrmDTO.EmployeeDTO>>> GetEmployees([FromQuery] int IdClient, CancellationToken cancellationToken)
         {
             var employees = await _context.Employees
+
+                .AsNoTracking()
 
                 .Where(e => e.IdClient == 10001001)
                 .Select(e => new EmployeeDTO
@@ -45,9 +60,10 @@ namespace HrmApp.Api.Controllers
                     NationalIdentificationNumber = e.NationalIdentificationNumber,
                     Address = e.Address,
                     PresentAddress = e.PresentAddress,
+                    EmployeeImage = e.EmployeeImage,
                     IdGender = e.IdGender,
                     IdReligion = e.IdReligion,
-                    IdDepartment = e.IdDepartment,
+                    IdDepartment = e.IdDepartment,              
                     IdSection = e.IdSection,
                     IdDesignation = e.IdDesignation,
                     IdReportingManager = e.IdReportingManager,
@@ -57,9 +73,11 @@ namespace HrmApp.Api.Controllers
                     IdWeekOff = e.IdWeekOff,
                     CreatedBy = e.CreatedBy,
                     SetDate = e.SetDate,
-                    IsActive = e.IsActive,
+                    IsActive = e.IsActive ?? true,
                     HasOvertime = e.HasOvertime ?? false,
                     HasAttendenceBonus = e.HasAttendenceBonus ?? false,
+                    ProfileFile = await ConvertFileToByteArrayAsync(e.ProfileFile, cancellationToken),
+
 
 
                     EmployeeDocuments = e.EmployeeDocuments.Select(doc => new DocummentDto
@@ -68,8 +86,10 @@ namespace HrmApp.Api.Controllers
                         DocumentName = doc.DocumentName,
                         FileName = doc.FileName,
                         UploadDate = doc.UploadDate,
-                        //UploadedFileExtention = extension,
-                        //UploadedFile = uploadedBytes,
+                        UploadedFileExtention = doc.UploadedFileExtention,
+                        UploadedFile = doc.UploadedFile,
+                        UploadedFileBase = ConvertFileToBase64(doc.UploadedFile, doc.UploadedFileExtention),
+
                         SetDate = DateTime.Now
 
                     }).ToList(),
@@ -122,21 +142,26 @@ namespace HrmApp.Api.Controllers
 
                 })
 
-                 .ToListAsync();
+                 .ToListAsync(cancellationToken);
+
             return Ok(employees);
         }
+
 
 
 
         //GET by Id
 
         [HttpGet("detail/{id:int}")]
-        public async Task<ActionResult<HrmDTO.EmployeeDTO>> GetEmployeeById(int id)
+        public async Task<ActionResult<HrmDTO.EmployeeDTO>> GetEmployeeById ([FromQuery] int IdCliuent, [FromQuery] int id, CancellationToken cancellationToken)
         {
             var employee = await _context.Employees
 
-                .Where(e => e.Id == id)
+                .AsNoTracking()
+
+                .Where(e => e.IdClient == 10001001 && e.Id == id)
                 .Select(e => new EmployeeDTO
+
                 {
                     IdClient = 10001001,
                     Id = e.Id,
@@ -163,6 +188,9 @@ namespace HrmApp.Api.Controllers
                     CreatedBy = e.CreatedBy,
                     SetDate = e.SetDate,
                     IsActive = e.IsActive,
+                    
+
+
 
                     EmployeeDocuments = e.EmployeeDocuments.Select(doc => new DocummentDto
                     {
@@ -170,9 +198,10 @@ namespace HrmApp.Api.Controllers
                         DocumentName = doc.DocumentName,
                         FileName = doc.FileName,
                         UploadDate = doc.UploadDate,
-                        //UploadedFileExtention = extension,
-                        //UploadedFile = uploadedBytes,
-                        SetDate = DateTime.Now
+                        UploadedFileExtention = doc.UploadedFileExtention,
+                        UploadedFile = doc.UploadedFile,
+                        SetDate = DateTime.Now,
+                        UploadedFileBase = ConvertFileToBase64(doc.UploadedFile, doc.UploadedFileExtention),
 
                     }).ToList(),
 
@@ -230,7 +259,7 @@ namespace HrmApp.Api.Controllers
 
 
                 })
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(cancellationToken);
 
             if (employee == null)
                 return NotFound("Sorry! Not Found.");
@@ -245,12 +274,73 @@ namespace HrmApp.Api.Controllers
 
         [HttpPost]
 
-        public async Task<ActionResult<Employee>> CreateEmployee(EmployeeDTO createDto)
+        public async Task<ActionResult<Employee>> CreateEmployee([FromForm] EmployeeDTO createDto, CancellationToken cancellationToken)
         {
-            var employee = new Employee
+
+            const long FileSize = 10 * 1024 * 1024;
+
+            // Validate EmployeeImage size
+
+            if (createDto.EmployeeImage != null && createDto.EmployeeImage.Length > FileSize)
+
             {
 
+                return BadRequest("Image size exceeded 10 MB!");
 
+            }
+
+            // Convert Employee image to byte[]
+
+            byte[]? employeeImageBytes = null;
+
+            if (createDto.EmployeeImage != null && createDto.EmployeeImage.Length > 0)
+
+            {
+
+                using var ms = new MemoryStream();
+
+                await createDto.EmployeeImage.CopyToAsync(ms);
+
+                employeeImageBytes = ms.ToArray();
+
+            }
+
+            // Convert document files to byte[]
+
+            foreach (var doc in createDto.EmployeeDocuments)
+
+            {
+
+                if (doc.UploadedFile != null)
+
+                {
+
+                    if (doc.UploadedFile.Length > FileSize)
+
+                    {
+
+                        return BadRequest($"Document size exceeded 10 MB.");
+
+                    }
+
+                    using var ms = new MemoryStream();
+
+                    await doc.UploadedFile.CopyToAsync(ms);
+
+                    doc.UploadedFileExtention = Path.GetExtension(doc.UploadedFile.FileName);
+
+                    doc.FileName = Path.GetFileName(doc.UploadedFile.FileName);
+
+                    doc.UploadDate = DateTime.Now;
+
+                    doc.UploadedFileBase = ms.ToArray();
+
+                }
+
+            }
+
+            var employee = new Employee
+            {
                 IdClient = 10001001,
 
                 EmployeeName = createDto.EmployeeName,
@@ -285,8 +375,8 @@ namespace HrmApp.Api.Controllers
                     DocumentName = doc.DocumentName,
                     FileName = doc.FileName,
                     UploadDate = doc.UploadDate,
-                    //UploadedFileExtention = extension,
-                    //UploadedFile = uploadedBytes,
+                    UploadedFileExtention = doc.UploadedFileExtention,
+                    UploadedFile = doc.UploadedFile,
                     SetDate = DateTime.Now
 
                 }).ToList(),
@@ -353,7 +443,7 @@ namespace HrmApp.Api.Controllers
 
 
             _context.Employees.Add(employee);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
 
 
             return Ok(employee);
@@ -363,15 +453,31 @@ namespace HrmApp.Api.Controllers
         //PUT Operation
 
         [HttpPut]
-        public async Task<IActionResult> UpdateEmployee(EmployeeDTO updateDto)
+        public async Task<IActionResult> UpdateEmployee([FromForm] EmployeeDTO updateDto, CancellationToken cancellationToken)
+
         {
-            var employee = await _context.Employees.FirstOrDefaultAsync(e => e.Id == updateDto.Id); // First employee Id will be like upodate Dto Id.
+
+            const long FileSize = 10 * 1024 * 1024;
+
+
+            var employee = await _context.Employees
+                .Include(e => e.EmployeeDocuments)
+
+                .Include(e => e.EmployeeEducationInfos)
+
+                .Include(e => e.EmployeeProfessionalCertifications)
+
+                .Include(e => e.EmployeeFamilyInfos)
+                .FirstOrDefaultAsync(e => e.IdClient == 10001001 && e.Id == updateDto.Id, cancellationToken); // First employee Id will be like upodate Dto Id.
+
+
             if (employee == null)
             {
                 return BadRequest("Employee not found! ");
             }
 
-            employee.IdClient = 10001001;
+            employee.IdClient = updateDto.IdClient;
+            employee.Id = updateDto.Id;
             employee.IdGender = updateDto.IdGender;
             employee.EmployeeName = updateDto.EmployeeName;
             employee.Address = updateDto.Address;
@@ -390,32 +496,134 @@ namespace HrmApp.Api.Controllers
             employee.IdMaritalStatus = updateDto.IdMaritalStatus;
             employee.IsActive = updateDto.IsActive;
 
-            var result = await _context.SaveChangesAsync();
 
 
-            return Ok(employee);
+
+            if (employee.EmployeeImage != null && employee.EmployeeImage.Length > 0)
+
+            {
+
+                if (employee.EmployeeImage.Length > FileSize)
+
+                    throw new Exception("Employee image size cannot exceed 10 MB.");
+
+                using var ms = new MemoryStream();
+
+                await employee.EmployeeImage.CopyToAsync(ms, cancellationToken);
+
+                employee.EmployeeImage = ms.ToArray();
+
+
+
+                //Delete obsolete documents
+                var deletedEmployeeDocumentList = employee.EmployeeDocuments
+                 .Where(ed => ed.IdClient == updateDto.IdClient && !updateDto.EmployeeDocuments.Any(d => d.IdClient == ed.IdClient && d.Id == ed.Id))
+                 .ToList();
+
+                if (deletedEmployeeDocumentList.Any())
+                {
+                    _context.EmployeeDocuments.RemoveRange(deletedEmployeeDocumentList);
+                }
+
+                //up/insert new documents
+                foreach (var item in updateDto.EmployeeDocuments)
+                {
+                    var existingEntry = employee.EmployeeDocuments.FirstOrDefault(ed => ed.IdClient == item.IdClient && ed.Id == item.Id);
+                    if (existingEntry != null)
+                    {
+                        existingEntry.DocumentName = item.DocumentName;
+                        existingEntry.FileName = item.FileName;
+                        existingEntry.UploadDate = item.UploadDate;
+                        existingEntry.SetDate = DateTime.Now;
+                    }
+                    else
+                    {
+                        var newEmployeeDocument = new EmployeeDocument()
+                        {
+                            IdClient = item.IdClient,
+                            IdEmployee = employee.Id,
+                            DocumentName = item.DocumentName,
+                            FileName = item.FileName,
+                            UploadDate = item.UploadDate,
+                            SetDate = DateTime.Now
+                        };
+
+                        employee.EmployeeDocuments.Add(newEmployeeDocument);
+                    }
+                }
+
+
+
+
+
+                var result = await _context.SaveChangesAsync();
+
+
+                return Ok(employee);
+
+            }
 
         }
 
+            //Delete Operation
 
 
-        //Delete Operation
+            [HttpDelete("{id}")]
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> SoftDeleteEmployee(int id)
-        {
-            var employee = await _context.Employees.FirstOrDefaultAsync(e => e.Id == id && e.IdClient == 10001001);
+            public async Task<IActionResult> SoftDeleteEmployee(int id)
 
-            if (employee == null)
-                return NotFound();
 
-            employee.IsActive = false;
+            {
+                var employee = await _context.Employees.FirstOrDefaultAsync(e => e.Id == id && e.IdClient == 10001001);
 
-            await _context.SaveChangesAsync();
+                if (employee == null)
+                    return NotFound();
 
-            return Ok(employee);
-        }
+                employee.IsActive = false;
 
+                await _context.SaveChangesAsync();
+
+                return Ok(employee);
+            }
+   
+
+
+
+        //private static string GetMimeType(string? extension)
+        //{
+        //    return extension?.ToLower() switch
+        //    {
+        //        ".jpg" or ".jpeg" => "image/jpeg",
+        //        ".png" => "image/png",
+        //        ".gif" => "image/gif",
+        //        ".pdf" => "application/pdf",
+        //        ".doc" => "application/msword",
+        //        ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        //        ".xls" => "application/vnd.ms-excel",
+        //        ".xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        //        ".txt" => "text/plain",
+        //        _ => "application/octet-stream" // fallback
+        //    };
+        //}
+
+        //private static string? ConvertImageToBase64(byte[]? image)
+        //{
+        //    if (image == null || image.Length == 0)
+        //        return null;
+        //    return image != null
+        //        ? $"data:image/jpeg;base64,{Convert.ToBase64String(image)}"
+        //        : null;
+        //}
+
+
+        //private static string? ConvertFileToBase64(byte[] fileBytes, string? fileExtension)
+        //{
+        //    if (fileBytes == null || string.IsNullOrEmpty(fileExtension))
+        //        return null;
+
+        //    var mimeType = GetMimeType(fileExtension);
+        //    return $"data:{mimeType};base64,{Convert.ToBase64String(fileBytes)}";
+        //}
 
     }
 

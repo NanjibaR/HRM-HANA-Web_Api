@@ -7,7 +7,7 @@ namespace HrmApp.Api.HrmDTO
     {
         public int IdClient { get; set; }
 
-        public string? InstituteName { get; set; }
+        public required string InstituteName { get; set; }
         public int IdEducationLevel { get; set; }
 
         public int IdEducationExamination { get; set; }
