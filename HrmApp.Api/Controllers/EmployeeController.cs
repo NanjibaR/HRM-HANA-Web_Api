@@ -76,7 +76,7 @@ namespace HrmApp.Api.Controllers
                     IsActive = e.IsActive ?? true,
                     HasOvertime = e.HasOvertime ?? false,
                     HasAttendenceBonus = e.HasAttendenceBonus ?? false,
-                    ProfileFile = await ConvertFileToByteArrayAsync(e.ProfileFile, cancellationToken),
+                  
 
 
 
@@ -88,7 +88,7 @@ namespace HrmApp.Api.Controllers
                         UploadDate = doc.UploadDate,
                         UploadedFileExtention = doc.UploadedFileExtention,
                         UploadedFile = doc.UploadedFile,
-                        UploadedFileBase = ConvertFileToBase64(doc.UploadedFile, doc.UploadedFileExtention),
+                      
 
                         SetDate = DateTime.Now
 
@@ -277,67 +277,67 @@ namespace HrmApp.Api.Controllers
         public async Task<ActionResult<Employee>> CreateEmployee([FromForm] EmployeeDTO createDto, CancellationToken cancellationToken)
         {
 
-            const long FileSize = 10 * 1024 * 1024;
+            //const long FileSize = 10 * 1024 * 1024;
 
-            // Validate EmployeeImage size
+            //// Validate EmployeeImage size
 
-            if (createDto.EmployeeImage != null && createDto.EmployeeImage.Length > FileSize)
+            //if (createDto.EmployeeImage != null && createDto.EmployeeImage.Length > FileSize)
 
-            {
+            //{
 
-                return BadRequest("Image size exceeded 10 MB!");
+            //    return BadRequest("Image size exceeded 10 MB!");
 
-            }
+            //}
 
-            // Convert Employee image to byte[]
+            //// Convert Employee image to byte[]
 
-            byte[]? employeeImageBytes = null;
+            //byte[]? employeeImageBytes = null;
 
-            if (createDto.EmployeeImage != null && createDto.EmployeeImage.Length > 0)
+            //if (createDto.EmployeeImage != null && createDto.EmployeeImage.Length > 0)
 
-            {
+            //{
 
-                using var ms = new MemoryStream();
+            //    using var ms = new MemoryStream();
 
-                await createDto.EmployeeImage.CopyToAsync(ms);
+            //    await createDto.EmployeeImage.CopyToAsync(ms);
 
-                employeeImageBytes = ms.ToArray();
+            //    employeeImageBytes = ms.ToArray();
 
-            }
+            //}
 
-            // Convert document files to byte[]
+            //// Convert document files to byte[]
 
-            foreach (var doc in createDto.EmployeeDocuments)
+            //foreach (var doc in createDto.EmployeeDocuments)
 
-            {
+            //{
 
-                if (doc.UploadedFile != null)
+            //    if (doc.UploadedFile != null)
 
-                {
+            //    {
 
-                    if (doc.UploadedFile.Length > FileSize)
+            //        if (doc.UploadedFile.Length > FileSize)
 
-                    {
+            //        {
 
-                        return BadRequest($"Document size exceeded 10 MB.");
+            //            return BadRequest($"Document size exceeded 10 MB.");
 
-                    }
+            //        }
 
-                    using var ms = new MemoryStream();
+            //        using var ms = new MemoryStream();
 
-                    await doc.UploadedFile.CopyToAsync(ms);
+            //        await doc.UploadedFile.CopyToAsync(ms);
 
-                    doc.UploadedFileExtention = Path.GetExtension(doc.UploadedFile.FileName);
+            //        doc.UploadedFileExtention = Path.GetExtension(doc.UploadedFile.FileName);
 
-                    doc.FileName = Path.GetFileName(doc.UploadedFile.FileName);
+            //        doc.FileName = Path.GetFileName(doc.UploadedFile.FileName);
 
-                    doc.UploadDate = DateTime.Now;
+            //        doc.UploadDate = DateTime.Now;
 
-                    doc.UploadedFileBase = ms.ToArray();
+            //        doc.UploadedFileBase = ms.ToArray();
 
-                }
+            //    }
 
-            }
+            //}
 
             var employee = new Employee
             {
@@ -365,7 +365,7 @@ namespace HrmApp.Api.Controllers
                 CreatedBy = createDto.CreatedBy,
                 SetDate = DateTime.Now,
                 IsActive = createDto.IsActive ?? true,
-
+                EmployeeImage = await ConvertFileToByteArrayAsync(createDto.ProfileFile, cancellationToken),
 
 
 
