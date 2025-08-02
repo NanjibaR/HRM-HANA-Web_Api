@@ -5,6 +5,7 @@ namespace HrmApp.Api.HrmDTO
 {
     public class EducationInfoDto
     {
+        public int Id { get; set; }
         public int IdClient { get; set; }
 
         public required string InstituteName { get; set; }

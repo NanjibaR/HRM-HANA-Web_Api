@@ -4,6 +4,8 @@ namespace HrmApp.Api.HrmDTO
 {
     public class EmployeefamilyInfoDto
     {
+
+        public int Id { get; set; }
         public int IdClient { get; set; }
 
     

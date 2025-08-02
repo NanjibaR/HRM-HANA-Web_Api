@@ -83,6 +83,6 @@ namespace HrmApp.Api.HrmDTO
         public List<EmployeeProfessionalCertificationDto> EmployeeProfessionalCertifications { get; set; } = [];
 
         public IFormFile? ProfileFile { get; set; }
-
+        public string? EmployeeImageBase { get; internal set; }
     }
 }

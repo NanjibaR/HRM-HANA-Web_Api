@@ -4,6 +4,7 @@ namespace HrmApp.Api.HrmDTO
 {
     public class EmployeeProfessionalCertificationDto
     {
+        public int Id { get; set; }
         public int IdClient { get; set; }
         public string? CertificationTitle { get; set; }
         public string? CertificationInstitute { get; set; } 

@@ -4,6 +4,7 @@ namespace HrmApp.Api.HrmDTO
 {
     public class DocummentDto
     {
+        public int Id { get; internal set; }
         public int IdClient { get; set; }
         public string DocumentName { get; set; } = null!;
 
@@ -14,9 +15,14 @@ namespace HrmApp.Api.HrmDTO
         public string? UploadedFileExtention { get; set; }
 
         public byte[]? UploadedFile { get; set; }
-
-        public byte[]? UploadedFileBase { get; set; }
         public DateTime? SetDate { get; set; }
-        public int Id { get; internal set; }
+        public IFormFile? UpFile { get; set; }
+
+
+
+
+
+
+
     }
 }
