@@ -404,9 +404,6 @@ namespace HrmApp.Api.Controllers
 
 
 
-
-
-
         //PUT Operation
 
         [HttpPut]
